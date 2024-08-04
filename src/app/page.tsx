@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { Box, Stack, Typography, Button, Modal, TextField } from '@mui/material'
+import Autocomplete from '@mui/material/Autocomplete';
 import { firestore } from './firebase'
 import {
   collection,
@@ -35,9 +36,10 @@ export default function Home() {
   const [open, setOpen] = useState(false)
   const [inventory, setInventory] = useState([])
   const [itemName, setItemName] = useState("")
+  const [searchItem, setSearchItem]=useState('')
 
   const updateInventory = async () => {
-    const snapshot = query(collection(firestore, 'inventory'))
+    const snapshot = query(collection(firestore, 'inventory-app'))
     const docs = await getDocs(snapshot)
     const inventoryList:any = []
     docs.forEach((doc) => {
@@ -51,7 +53,7 @@ export default function Home() {
   }, [])
 
   const addItem = async (item:string) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
+    const docRef = doc(collection(firestore, 'inventory-app'), item)
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
       const { quantity } = docSnap.data()
@@ -63,7 +65,7 @@ export default function Home() {
   }
   
   const removeItem = async (item:string) => {
-    const docRef = doc(collection(firestore, 'inventory'), item)
+    const docRef = doc(collection(firestore, 'inventory-app'), item)
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
       const { quantity } = docSnap.data()
@@ -123,6 +125,23 @@ return (
     <Button variant="contained" onClick={handleOpen}>
       Add New Item
     </Button>
+    <Autocomplete
+        freeSolo
+        id="free-solo-2-demo"
+        disableClearable
+        style={{width:'300px', alignSelf:'center', marginLeft:'-33%'}}
+        options={inventory.map((option) => option.name)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Search input"
+            InputProps={{
+              ...params.InputProps,
+              type: 'search',
+            }}
+          />
+        )}
+      />
     <Box border={'1px solid #333'}>
       <Box
         width="800px"
@@ -133,7 +152,7 @@ return (
         alignItems={'center'}
       >
         <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
-          Inventory Items
+          Pantry Items
         </Typography>
       </Box>
       <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
